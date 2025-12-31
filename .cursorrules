@@ -1,0 +1,43 @@
+# Cursor AI Rules for g1-record-and-replay
+
+## Package Management
+- **ALWAYS use `uv pip` instead of `pip`** for all package installations
+- Virtual environment is located at `.venv`
+- Activate with: `source .venv/bin/activate`
+
+## Commands
+```bash
+# Install packages
+uv pip install <package>
+
+# Install project in development mode
+uv pip install -e .
+
+# Install from requirements
+uv pip install -r requirements.txt
+```
+
+## Python Environment
+- Using uv for package management
+- Virtual environment: `.venv` (created with `uv venv .venv`)
+- Python version: 3.12.3
+
+## Project Structure
+- Main package: `g1_record_replay/`
+- CLI scripts: `scripts/`
+- Tests: `tests/`
+- Config: `config/`
+- Data: `data/episodes/`
+
+## Key Dependencies
+- **unitree_sdk2_python** (REQUIRED - install first from ../unitree_sdk2_python)
+- numpy, h5py, pyyaml, rich, matplotlib
+
+## Installation Order
+1. First: `cd ../unitree_sdk2_python && uv pip install -e .`
+2. Then: `cd ../g1-record-and-replay && uv pip install -e .`
+
+## Network Interface
+- Default: eth0 (or enp2s0 for development machines)
+- Pattern matches g1_upload.py for compatibility
+

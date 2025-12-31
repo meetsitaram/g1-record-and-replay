@@ -1,0 +1,71 @@
+# Default configuration for G1 Record and Replay
+
+# Robot Configuration
+robot:
+  model: "G1-29DOF"
+  num_motors: 29
+  
+# Control Settings
+control:
+  frequency: 50  # Hz
+  dt: 0.002  # 2ms control loop
+  
+# Recording Settings
+recording:
+  default_frequency: 50  # Hz
+  save_velocities: true
+  
+# Replay Settings
+replay:
+  transition_duration: 3.0  # seconds to transition to start position
+  default_speed: 1.0
+  max_speed: 2.0
+  min_speed: 0.25
+  
+# Safety Settings
+safety:
+  enable_position_limits: true
+  enable_velocity_limits: true
+  max_velocity: 3.0  # rad/s
+  emergency_stop_decel: 0.5  # deceleration factor for emergency stop
+  
+# Joint Groups
+joint_groups:
+  legs:
+    - left_hip_pitch
+    - left_hip_roll
+    - left_hip_yaw
+    - left_knee
+    - left_ankle_pitch
+    - left_ankle_roll
+    - right_hip_pitch
+    - right_hip_roll
+    - right_hip_yaw
+    - right_knee
+    - right_ankle_pitch
+    - right_ankle_roll
+  waist:
+    - waist_yaw
+    - waist_roll
+    - waist_pitch
+  arms:
+    - left_shoulder_pitch
+    - left_shoulder_roll
+    - left_shoulder_yaw
+    - left_elbow
+    - left_wrist_roll
+    - left_wrist_pitch
+    - left_wrist_yaw
+    - right_shoulder_pitch
+    - right_shoulder_roll
+    - right_shoulder_yaw
+    - right_elbow
+    - right_wrist_roll
+    - right_wrist_pitch
+    - right_wrist_yaw
+
+# Data Storage
+data:
+  episodes_dir: "data/episodes"
+  calibration_file: "config/joint_limits.json"
+

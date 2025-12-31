@@ -1,0 +1,70 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual Environment
+venv/
+.venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.cursor/
+
+# Data & Episodes (keep directory structure but not data files)
+data/episodes/*.h5
+data/episodes/*.hdf5
+data/episodes/*.png
+data/episodes/*.jpg
+data/episodes/test_*.png
+!data/episodes/.gitkeep
+
+# Logs
+*.log
+logs/
+
+# Config (except defaults)
+config/joint_limits.json
+
+# OS
+.DS_Store
+Thumbs.db
+.AppleDouble
+.LSOverride
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.backup
+
+# Test outputs
+test_*.png
+test_*.h5
+
