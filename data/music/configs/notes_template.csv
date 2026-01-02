@@ -1,0 +1,23 @@
+# Notes Template CSV
+# Format: note_name,hand
+# Use this template for batch note configuration
+#
+# Example usage:
+# python scripts/music/setup_music_config.py --batch-file data/music/configs/notes_template.csv
+
+# Piano - One octave C major scale
+C1,left
+D1,left
+E1,left
+F1,left
+G1,left
+A1,left
+B1,left
+C2,right
+D2,right
+E2,right
+F2,right
+G2,right
+A2,right
+B2,right
+

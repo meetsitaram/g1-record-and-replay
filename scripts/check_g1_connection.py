@@ -2,12 +2,17 @@
 """
 Simple script to verify G1 robot connection.
 Checks network interfaces, robot reachability, and SDK connectivity.
+
+Usage:
+    python scripts/check_g1_connection.py
+    python scripts/check_g1_connection.py --robot-ip 100.96.120.54
 """
 
 import subprocess
 import re
 import sys
 import time
+import argparse
 from pathlib import Path
 
 # Add parent directory to path for imports
@@ -94,7 +99,7 @@ def try_sdk_connection(interface):
         print(f"  ❌ SDK connection failed: {e}")
         return False
 
-def main():
+def main(robot_ip=None):
     print("\n" + "="*60)
     print("  🤖 G1 Robot Connection Checker")
     print("="*60)
@@ -112,42 +117,56 @@ def main():
     for iface, ip in interfaces:
         print(f"   {iface}: {ip}")
     
-    # Step 2: Check common robot IPs
+    # Step 2: Check robot reachability
     print_section("Step 2: Robot Reachability")
     
-    common_robot_ips = [
-        '192.168.123.161',  # Default G1 IP
-        '192.168.123.1',    # Alternative
-        '192.168.1.161',    # Alternative subnet
-    ]
+    # Build list of IPs to check
+    ips_to_check = []
     
-    # Also check IPs on same subnet as our interfaces
-    for iface, ip in interfaces:
-        parts = ip.split('.')
-        if len(parts) == 4:
-            # Add .161 on same subnet
-            subnet_ip = f"{parts[0]}.{parts[1]}.{parts[2]}.161"
-            if subnet_ip not in common_robot_ips:
-                common_robot_ips.append(subnet_ip)
+    if robot_ip:
+        # User specified a robot IP
+        print(f"Using specified robot IP: {robot_ip}\n")
+        ips_to_check = [robot_ip]
+    else:
+        # Check common default IPs
+        print("No robot IP specified, checking common defaults...\n")
+        common_robot_ips = [
+            '192.168.123.161',  # Default G1 IP
+            '192.168.123.1',    # Alternative
+            '192.168.1.161',    # Alternative subnet
+        ]
+        
+        # Also check IPs on same subnet as our interfaces
+        for iface, ip in interfaces:
+            parts = ip.split('.')
+            if len(parts) == 4:
+                # Add .161 on same subnet
+                subnet_ip = f"{parts[0]}.{parts[1]}.{parts[2]}.161"
+                if subnet_ip not in common_robot_ips:
+                    common_robot_ips.append(subnet_ip)
+        
+        ips_to_check = common_robot_ips
     
     reachable_ips = []
-    print("Checking common G1 IP addresses...\n")
     
-    for robot_ip in common_robot_ips:
-        print(f"  Testing {robot_ip}...", end=' ', flush=True)
-        if check_robot_ping(robot_ip):
+    for test_ip in ips_to_check:
+        print(f"  Testing {test_ip}...", end=' ', flush=True)
+        if check_robot_ping(test_ip):
             print("✅ Reachable!")
-            reachable_ips.append(robot_ip)
+            reachable_ips.append(test_ip)
         else:
             print("❌ Not reachable")
     
     if not reachable_ips:
-        print("\n❌ No G1 robot found on common IP addresses")
+        print("\n❌ No G1 robot found at specified IP(s)")
         print("\nTroubleshooting:")
         print("  1. Is the robot powered on?")
-        print("  2. Is the Ethernet cable connected?")
-        print("  3. Check robot IP in the Unitree app")
+        print("  2. Is the network connection active (WiFi/Ethernet)?")
+        print("  3. Check robot IP in the Unitree app or router")
         print("  4. Try manually: ping <robot-ip>")
+        if not robot_ip:
+            print("\nℹ️  If you know the robot IP, specify it:")
+            print("     python scripts/check_g1_connection.py --robot-ip <ip>")
         return False
     
     print(f"\n✅ Robot reachable at: {', '.join(reachable_ips)}")
@@ -182,10 +201,36 @@ def main():
     return False
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser(
+        description='Check G1 robot connection and identify correct network interface',
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+  # Auto-detect robot on common IPs
+  python scripts/check_g1_connection.py
+  
+  # Specify robot IP (e.g., for WiFi)
+  python scripts/check_g1_connection.py --robot-ip 100.96.120.54
+  
+  # First find your WiFi interface
+  python scripts/find_robot_interface.py
+  # Then check connection
+  python scripts/check_g1_connection.py --robot-ip <robot-ip>
+        """
+    )
+    
+    parser.add_argument(
+        '--robot-ip',
+        type=str,
+        help='Specific robot IP address to check (e.g., 100.96.120.54 for WiFi)'
+    )
+    
+    args = parser.parse_args()
+    
     print("\nChecking G1 robot connection...\n")
     
     try:
-        success = main()
+        success = main(robot_ip=args.robot_ip)
         
         print("\n" + "="*60)
         if success:

@@ -1,0 +1,15 @@
+# C Major Scale
+# Basic piano exercise
+# Tempo: 120 BPM
+
+# Ascending scale (left hand)
+C1:left:quarter -> D1:left:quarter -> E1:left:quarter -> F1:left:quarter
+G1:left:quarter -> A1:left:quarter -> B1:left:quarter -> C2:left:half
+
+# Short pause
+rest:none:half
+
+# Descending scale (left hand)
+C2:left:quarter -> B1:left:quarter -> A1:left:quarter -> G1:left:quarter
+F1:left:quarter -> E1:left:quarter -> D1:left:quarter -> C1:left:half
+

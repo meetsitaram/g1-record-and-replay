@@ -1,0 +1,44 @@
+# Twinkle Twinkle Little Star
+# Traditional Lullaby
+# Tempo: 100 BPM
+# Time Signature: 4/4
+
+# "Twinkle twinkle little star"
+C1:left:quarter -> C1:left:quarter -> G1:left:quarter -> G1:left:quarter
+A1:left:quarter -> A1:left:quarter -> G1:left:half
+
+# Short pause
+rest:none:quarter
+
+# "How I wonder what you are"
+F1:left:quarter -> F1:left:quarter -> E1:left:quarter -> E1:left:quarter
+D1:left:quarter -> D1:left:quarter -> C1:left:half
+
+# Short pause
+rest:none:quarter
+
+# "Up above the world so high"
+G1:left:quarter -> G1:left:quarter -> F1:left:quarter -> F1:left:quarter
+E1:left:quarter -> E1:left:quarter -> D1:left:half
+
+# Short pause
+rest:none:quarter
+
+# "Like a diamond in the sky"
+G1:left:quarter -> G1:left:quarter -> F1:left:quarter -> F1:left:quarter
+E1:left:quarter -> E1:left:quarter -> D1:left:half
+
+# Short pause
+rest:none:quarter
+
+# "Twinkle twinkle little star" (repeat)
+C1:left:quarter -> C1:left:quarter -> G1:left:quarter -> G1:left:quarter
+A1:left:quarter -> A1:left:quarter -> G1:left:half
+
+# Short pause
+rest:none:quarter
+
+# "How I wonder what you are" (repeat)
+F1:left:quarter -> F1:left:quarter -> E1:left:quarter -> E1:left:quarter
+D1:left:quarter -> D1:left:quarter -> C1:left:half
+

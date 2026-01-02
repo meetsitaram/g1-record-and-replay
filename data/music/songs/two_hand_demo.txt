@@ -1,0 +1,21 @@
+# Two-Hand Demonstration
+# Shows simultaneous left and right hand playing
+# Tempo: 120 BPM
+
+# Simple chord progression
+C1:left:full;C2:right:full
+rest:none:quarter
+
+D1:left:full;D2:right:full
+rest:none:quarter
+
+E1:left:full;E2:right:full
+rest:none:quarter
+
+# Alternating hands
+C1:left:quarter -> C2:right:quarter -> D1:left:quarter -> D2:right:quarter
+E1:left:quarter -> E2:right:quarter -> F1:left:quarter -> F2:right:quarter
+
+# Finishing chord
+C1:left:full;E1:left:full;C2:right:full;G2:right:full
+

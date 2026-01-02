@@ -1,0 +1,17 @@
+# Mary Had a Little Lamb
+# Traditional Nursery Rhyme
+# Tempo: 120 BPM
+# Time Signature: 4/4
+
+# Verse 1: "Mary had a little lamb"
+E2:right:quarter -> D2:right:quarter -> C2:right:quarter -> D2:right:quarter
+
+# "Little lamb, little lamb"
+E2:right:quarter -> E2:right:quarter -> E2:right:half
+
+# "Mary had a little lamb"
+D2:right:quarter -> D2:right:quarter -> D2:right:half
+
+# "Its fleece was white as snow"
+E2:right:quarter -> G2:right:quarter -> G2:right:half
+
