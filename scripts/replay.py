@@ -58,6 +58,12 @@ Safety:
         help='Playback speed multiplier (0.25 to 2.0, default: 1.0)'
     )
     
+    parser.add_argument(
+        '--skip-safety',
+        action='store_true',
+        help='Skip safety confirmation prompt (NOT RECOMMENDED - for testing only)'
+    )
+    
     args = parser.parse_args()
     
     # Validate episode file exists
@@ -70,7 +76,8 @@ Safety:
     run_replay(
         network_interface=args.network_interface,
         episode_path=str(episode_path),
-        playback_speed=args.speed
+        playback_speed=args.speed,
+        skip_safety=args.skip_safety
     )
 
 

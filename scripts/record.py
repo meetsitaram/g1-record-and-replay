@@ -70,6 +70,12 @@ Controls during recording:
         help='Display current joint positions in real-time during recording'
     )
     
+    parser.add_argument(
+        '--skip-safety',
+        action='store_true',
+        help='Skip safety confirmation prompt (NOT RECOMMENDED - for testing only)'
+    )
+    
     args = parser.parse_args()
     
     # Run recording
@@ -78,7 +84,8 @@ Controls during recording:
         frequency=args.frequency,
         episode_name=args.name,
         joint_group=args.joint_group,
-        show_positions=args.show_positions
+        show_positions=args.show_positions,
+        skip_safety=args.skip_safety
     )
 
 
