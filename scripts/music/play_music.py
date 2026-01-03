@@ -76,7 +76,13 @@ def main():
         '--speed',
         type=float,
         default=1.0,
-        help='Playback speed multiplier (default: 1.0)'
+        help='Playback speed multiplier for init/final positions (default: 1.0)'
+    )
+    parser.add_argument(
+        '--note-speed',
+        type=float,
+        default=None,
+        help='Playback speed multiplier for notes only (default: same as --speed)'
     )
     parser.add_argument(
         '--tempo-multiplier',
@@ -165,6 +171,10 @@ def main():
         console.print("[red]Speed must be between 0 and 2.0[/red]")
         return 1
     
+    if args.note_speed is not None and (args.note_speed <= 0 or args.note_speed > 5.0):
+        console.print("[red]Note speed must be between 0 and 5.0[/red]")
+        return 1
+    
     if args.tempo_multiplier <= 0 or args.tempo_multiplier > 3.0:
         console.print("[red]Tempo multiplier must be between 0 and 3.0[/red]")
         return 1
@@ -221,7 +231,8 @@ def main():
             playback_speed=args.speed,
             tempo_multiplier=args.tempo_multiplier,
             skip_init=args.skip_init,
-            skip_final=args.skip_final
+            skip_final=args.skip_final,
+            note_speed=args.note_speed
         )
         
     except KeyboardInterrupt:

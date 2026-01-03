@@ -2,6 +2,7 @@
 
 import time
 import threading
+import numpy as np
 from pathlib import Path
 from typing import List, Optional
 from rich.console import Console
@@ -204,22 +205,28 @@ class MusicReplayer:
     
     def play_song(self, sequence_str: str, playback_speed: float = 1.0,
                   tempo_multiplier: float = 1.0, skip_init: bool = False,
-                  skip_final: bool = False):
+                  skip_final: bool = False, note_speed: Optional[float] = None):
         """
         Play musical sequence with proper timing.
         
         Args:
             sequence_str: Note sequence string (format: "note:hand:duration -> ...")
-            playback_speed: Speed of episode playback (affects motor movement speed)
+            playback_speed: Speed of episode playback for init/final positions
             tempo_multiplier: Speed of timing between notes (affects rhythm)
             skip_init: Skip initial position transition
             skip_final: Skip final position transition
+            note_speed: Speed multiplier for note playback only (if None, uses playback_speed)
         """
+        # If note_speed not specified, use playback_speed for everything
+        if note_speed is None:
+            note_speed = playback_speed
+        
         self.console.print(Panel.fit(
             f"[bold cyan]🎵 Music Playback[/bold cyan]\n"
             f"Instrument: {self.config.instrument_name}\n"
             f"Tempo: {self.config.tempo_bpm} BPM (×{tempo_multiplier})\n"
-            f"Playback Speed: {playback_speed}×",
+            f"Init/Final Speed: {playback_speed}×\n"
+            f"Note Speed: {note_speed}×",
             border_style="cyan"
         ))
         
@@ -245,20 +252,20 @@ class MusicReplayer:
         try:
             self.playing = True
             
-            # Play init position
+            # Move to init position (transition to ready position, not play the whole episode)
             if not skip_init and self.config.init_position_episode:
                 self.console.print("\n[cyan]Moving to initial position...[/cyan]")
-                self._play_episode(self.config.init_position_episode, playback_speed)
+                self._transition_to_position(self.config.init_position_episode, use_end=True)
                 time.sleep(0.5)  # Brief pause after init
             
-            # Play sequence
-            self._play_sequence(actions, playback_speed, tempo_multiplier)
+            # Play sequence (use note_speed for notes)
+            self._play_sequence(actions, note_speed, tempo_multiplier)
             
-            # Play final position
+            # Move to final position (transition to rest position, not play the whole episode)
             if not skip_final and self.config.final_position_episode:
                 time.sleep(0.5)  # Brief pause before final
                 self.console.print("\n[cyan]Returning to final position...[/cyan]")
-                self._play_episode(self.config.final_position_episode, playback_speed)
+                self._transition_to_position(self.config.final_position_episode, use_end=True)
             
             self.console.print("\n[bold green]✓ Playback complete![/bold green]")
             
@@ -329,7 +336,8 @@ class MusicReplayer:
         note_info = self.config.notes[note_action.note]
         episode_path = note_info['episode_path']
         
-        self._play_episode(episode_path, playback_speed)
+        # Skip transition for notes - they should start from current position (ready position)
+        self._play_episode(episode_path, playback_speed, skip_transition=True)
     
     def _play_chord(self, chord_action: ChordAction, playback_speed: float):
         """Play simultaneous notes using threading"""
@@ -358,13 +366,69 @@ class MusicReplayer:
             for note_action, exc in exceptions:
                 self.console.print(f"[red]Error playing {note_action.note}: {exc}[/red]")
     
-    def _play_episode(self, episode_path: str, playback_speed: float):
+    def _transition_to_position(self, episode_path: str, use_end: bool = True, 
+                               transition_duration: float = 3.0):
+        """
+        Smoothly transition to a position from an episode (start or end frame).
+        
+        Args:
+            episode_path: Path to episode file
+            use_end: If True, transition to end position; if False, to start position
+            transition_duration: Duration of transition in seconds
+        """
+        # Load episode to get target position
+        episode_data = self.data_manager.load_episode(episode_path)
+        
+        if use_end:
+            target_pos = episode_data['joint_positions'][-1]  # Last frame
+        else:
+            target_pos = episode_data['joint_positions'][0]  # First frame
+        
+        # Get current position
+        state = self.interface.get_joint_state()
+        if state is None:
+            self.console.print("[red]Failed to get robot state![/red]")
+            return
+        
+        current_pos = state.positions
+        
+        # Get joint indices from metadata
+        metadata = episode_data['metadata']
+        joint_group = metadata.get('joint_group', 'all')
+        joint_indices = metadata.get('joint_indices', None)
+        if joint_indices is None:
+            from ..core import get_joint_indices
+            joint_indices = get_joint_indices(joint_group)
+        
+        # Smooth transition
+        start_time = time.time()
+        
+        while time.time() - start_time < transition_duration:
+            elapsed = time.time() - start_time
+            ratio = elapsed / transition_duration
+            
+            # Smooth interpolation using cosine
+            smooth_ratio = (1 - np.cos(ratio * np.pi)) / 2
+            
+            # Interpolate positions
+            interpolated_pos = current_pos + (target_pos - current_pos) * smooth_ratio
+            
+            # Send command (only for specified joints)
+            self.interface.send_joint_commands(interpolated_pos, joint_indices=joint_indices)
+            
+            time.sleep(0.002)  # 500Hz control
+        
+        # Send final target position
+        self.interface.send_joint_commands(target_pos, joint_indices=joint_indices)
+    
+    def _play_episode(self, episode_path: str, playback_speed: float, skip_transition: bool = False):
         """
         Use existing Replayer to play an episode.
         
         Args:
             episode_path: Path to episode file
             playback_speed: Playback speed multiplier
+            skip_transition: If True, start playing from current position without transitioning to start
         """
         replayer = Replayer(
             self.interface,
@@ -377,15 +441,16 @@ class MusicReplayer:
         replayer.running = True
         replayer.start_time = time.time()
         
-        # Get current position for smooth transition
-        state = self.interface.get_joint_state()
-        if state is not None:
-            current_pos = state.positions
-            target_pos = replayer.joint_positions[0]
-            
-            # Quick smooth transition (shorter than default)
-            replayer.transition_duration = 1.0
-            replayer._smooth_transition(current_pos, target_pos)
+        # Get current position for smooth transition (unless skipped)
+        if not skip_transition:
+            state = self.interface.get_joint_state()
+            if state is not None:
+                current_pos = state.positions
+                target_pos = replayer.joint_positions[0]
+                
+                # Quick smooth transition (shorter than default)
+                replayer.transition_duration = 1.0
+                replayer._smooth_transition(current_pos, target_pos)
         
         # Play through the episode
         while replayer.running:

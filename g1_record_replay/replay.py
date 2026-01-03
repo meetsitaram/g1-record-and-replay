@@ -149,8 +149,13 @@ class Replayer:
         alpha = (playback_time - t0) / (t1 - t0) if t1 > t0 else 0.0
         return pos0 + (pos1 - pos0) * alpha
     
-    def run(self):
-        """Run replay mode"""
+    def run(self, skip_transition: bool = False):
+        """
+        Run replay mode.
+        
+        Args:
+            skip_transition: If True, start playing from current position without transition
+        """
         self.console.print("[bold red]WARNING: Robot will move. Ensure area is clear![/bold red]")
         response = input("Type 'yes' to continue: ")
         if response.lower() != 'yes':
@@ -168,8 +173,11 @@ class Replayer:
         current_pos = state.positions
         target_pos = self.joint_positions[0]
         
-        # Smooth transition to start position
-        self._smooth_transition(current_pos, target_pos)
+        # Smooth transition to start position (unless skipped)
+        if not skip_transition:
+            self._smooth_transition(current_pos, target_pos)
+        else:
+            self.console.print("[yellow]Skipping transition - starting from current position[/yellow]")
         
         self.console.print("[bold cyan]Starting playback...[/bold cyan]")
         self.console.print("[bold]Press 'P' to pause/resume, 'Q' to quit[/bold]\n")

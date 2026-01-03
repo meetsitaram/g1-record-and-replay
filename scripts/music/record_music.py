@@ -87,6 +87,16 @@ def main():
         console.print(f"[yellow]Create one with: python scripts/music/setup_music_config.py[/yellow]")
         return 1
     
+    # Parse specific notes if provided (needed for both dry-run and actual recording)
+    specific_notes = None
+    if args.notes:
+        specific_notes = [n.strip() for n in args.notes.split(',')]
+        # Validate notes exist
+        for note in specific_notes:
+            if note not in config.notes:
+                console.print(f"[red]Note '{note}' not found in configuration[/red]")
+                return 1
+    
     # Handle info commands that don't need robot connection
     if args.list_status or args.note_details:
         # Create a dummy interface for these operations
@@ -130,16 +140,6 @@ def main():
             import traceback
             traceback.print_exc()
             return 1
-    
-    # Parse specific notes if provided
-    specific_notes = None
-    if args.notes:
-        specific_notes = [n.strip() for n in args.notes.split(',')]
-        # Validate notes exist
-        for note in specific_notes:
-            if note not in config.notes:
-                console.print(f"[red]Note '{note}' not found in configuration[/red]")
-                return 1
     
     # Safety check
     if not args.skip_safety:
